@@ -11,7 +11,7 @@ export default function BackgroundProvider({ children }: { children: ReactNode }
       const { data } = await supabase
         .from('profiles')
         .select('*')
-        .eq('username', 'Oblenbg')
+        .eq('username', 'Nevena Kostova')
         .maybeSingle();
 
       if (data) {

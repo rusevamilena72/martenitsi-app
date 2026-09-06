@@ -44,7 +44,12 @@ export default function Header() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-white rounded-full"></div>
+            <svg viewBox="0 0 64 64" className="w-8 h-8 flex-shrink-0">
+              <path d="M14 14 L32 26 L50 14" fill="none" stroke="#dc2626" strokeWidth="5" strokeLinecap="round" />
+              <path d="M14 20 L32 26 L50 20" fill="none" stroke="#ffffff" strokeWidth="5" strokeLinecap="round" />
+              <polygon points="24,23 6,54 26,58" fill="#dc2626" />
+              <polygon points="40,23 58,54 38,58" fill="#ffffff" stroke="#dc2626" strokeWidth="2.5" strokeLinejoin="round" />
+            </svg>
             <span className="text-xl font-bold text-gray-800">Мартеници</span>
           </Link>
 

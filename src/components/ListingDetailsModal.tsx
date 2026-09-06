@@ -11,8 +11,6 @@ export default function ListingDetailsModal({ listing, onClose }: ListingDetails
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const images = listing.images || [];
   const hasImages = images.length > 0;
-  const EUR_TO_BGN = 1.95583;
-  const priceInBGN = listing.price * EUR_TO_BGN;
 
   const nextImage = () => {
     if (hasImages) {
@@ -120,9 +118,6 @@ export default function ListingDetailsModal({ listing, onClose }: ListingDetails
               <h3 className="text-lg font-semibold text-gray-800 mb-2">Цена</h3>
               <p className="text-2xl font-bold text-red-600">
                 {listing.price.toFixed(2)} {listing.currency}
-              </p>
-              <p className="text-2xl font-bold text-red-600 mt-1">
-                {priceInBGN.toFixed(2)} лв.
               </p>
             </div>
 

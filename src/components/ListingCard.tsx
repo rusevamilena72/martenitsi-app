@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { ListingWithImages, getCategoryLabel, getCategoryPath, getAvailabilityLabel } from '../lib/supabase';
-import { Edit, Trash2, Eye, ArrowRight, ShoppingCart, Check } from 'lucide-react';
+import { Edit, Trash2, Eye, ShoppingCart, Check } from 'lucide-react';
 import ListingDetailsModal from './ListingDetailsModal';
 import { useCart } from '../contexts/CartContext';
 
@@ -52,23 +52,17 @@ export default function ListingCard({ listing, showActions = false, showCategory
   return (
     <>
       <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-        {showCategory && (
-          <div className="bg-red-50 px-4 py-2 border-b border-red-100">
-            <p className="text-xs text-gray-600 mb-1">
-              Категория: <span className="font-semibold text-red-700">{getCategoryLabel(listing.category)}</span>
-            </p>
+        <div className="relative h-64 bg-gradient-to-br from-red-100 to-white flex items-center justify-center overflow-hidden">
+          {showCategory && (
             <Link
               to={getCategoryPath(listing.category)}
-              className="text-xs text-red-600 hover:text-red-700 font-medium flex items-center gap-1 transition-colors"
               onClick={(e) => e.stopPropagation()}
+              className="absolute top-2 left-2 z-10 bg-white/90 backdrop-blur-sm text-red-700 text-xs font-semibold px-2 py-1 rounded-full shadow-sm hover:bg-white transition-colors"
             >
-              Виж още подобни
-              <ArrowRight size={14} />
+              {getCategoryLabel(listing.category)}
             </Link>
-          </div>
-        )}
+          )}
 
-        <div className="h-64 bg-gradient-to-br from-red-100 to-white flex items-center justify-center overflow-hidden">
           {displayImage ? (
             <img
               src={displayImage.image_data}

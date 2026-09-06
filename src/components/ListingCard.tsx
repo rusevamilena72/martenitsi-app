@@ -29,8 +29,6 @@ export default function ListingCard({ listing, showActions = false, showCategory
 
   const primaryImage = listing.images?.find(img => img.is_primary);
   const displayImage = primaryImage || (listing.images && listing.images.length > 0 ? listing.images[0] : null);
-  const EUR_TO_BGN = 1.95583;
-  const priceInBGN = listing.price * EUR_TO_BGN;
 
   return (
     <>
@@ -76,9 +74,6 @@ export default function ListingCard({ listing, showActions = false, showCategory
             <div>
               <div className="text-lg font-bold text-red-600">
                 {listing.price.toFixed(2)} {listing.currency}
-              </div>
-              <div className="text-lg font-bold text-red-600 mt-0.5">
-                {priceInBGN.toFixed(2)} лв.
               </div>
             </div>
 

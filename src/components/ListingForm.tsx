@@ -32,7 +32,7 @@ export default function ListingForm({ listing, onSuccess }: ListingFormProps) {
     description: listing?.description || '',
     size: listing?.size || '',
     price: listing?.price?.toString() || '',
-    currency: listing?.currency || ('лв.' as Currency),
+    currency: listing?.currency || ('EUR' as Currency),
     row_position: listing?.row_position?.toString() || '1',
     column_position: listing?.column_position?.toString() || '1',
     show_on_homepage: listing?.show_on_homepage || false,

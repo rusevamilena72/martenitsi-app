@@ -1,0 +1,120 @@
+import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { ListingWithImages, getCategoryLabel, getCategoryPath } from '../lib/supabase';
+import { Edit, Trash2, Eye, ArrowRight } from 'lucide-react';
+import ListingDetailsModal from './ListingDetailsModal';
+
+interface ListingCardProps {
+  listing: ListingWithImages;
+  showActions?: boolean;
+  showCategory?: boolean;
+  onDelete?: (id: string) => void;
+}
+
+export default function ListingCard({ listing, showActions = false, showCategory = false, onDelete }: ListingCardProps) {
+  const [showDetails, setShowDetails] = useState(false);
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onDelete && confirm('Сигурни ли сте, че искате да изтриете тази обява?')) {
+      onDelete(listing.id);
+    }
+  };
+
+  const handleDetailsClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowDetails(true);
+  };
+
+  const primaryImage = listing.images?.find(img => img.is_primary);
+  const displayImage = primaryImage || (listing.images && listing.images.length > 0 ? listing.images[0] : null);
+  const EUR_TO_BGN = 1.95583;
+  const priceInBGN = listing.price * EUR_TO_BGN;
+
+  return (
+    <>
+      <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+        {showCategory && (
+          <div className="bg-red-50 px-4 py-2 border-b border-red-100">
+            <p className="text-xs text-gray-600 mb-1">
+              Категория: <span className="font-semibold text-red-700">{getCategoryLabel(listing.category)}</span>
+            </p>
+            <Link
+              to={getCategoryPath(listing.category)}
+              className="text-xs text-red-600 hover:text-red-700 font-medium flex items-center gap-1 transition-colors"
+              onClick={(e) => e.stopPropagation()}
+            >
+              Виж още подобни
+              <ArrowRight size={14} />
+            </Link>
+          </div>
+        )}
+
+        <div className="h-64 bg-gradient-to-br from-red-100 to-white flex items-center justify-center overflow-hidden">
+          {displayImage ? (
+            <img
+              src={displayImage.image_data}
+              alt={listing.name}
+              className="w-full h-full object-contain"
+            />
+          ) : (
+            <div className="text-6xl">🎀</div>
+          )}
+        </div>
+
+        <div className="p-4">
+          <h3 className="text-lg font-semibold text-gray-800 mb-2 break-words">{listing.name}</h3>
+
+          <p className="text-sm text-gray-600 mb-3 line-clamp-2">{listing.description}</p>
+
+          {listing.size && (
+            <p className="text-xs text-gray-500 mb-2">Размер: {listing.size}</p>
+          )}
+
+          <div className="flex items-center justify-between mt-4">
+            <div>
+              <div className="text-lg font-bold text-red-600">
+                {listing.price.toFixed(2)} {listing.currency}
+              </div>
+              <div className="text-lg font-bold text-red-600 mt-0.5">
+                {priceInBGN.toFixed(2)} лв.
+              </div>
+            </div>
+
+            {showActions ? (
+              <div className="flex gap-2">
+                <Link
+                  to={`/listings/edit/${listing.id}`}
+                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                  title="Редактирай"
+                >
+                  <Edit size={18} />
+                </Link>
+                <button
+                  onClick={handleDelete}
+                  className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                  title="Изтрий"
+                >
+                  <Trash2 size={18} />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={handleDetailsClick}
+                className="flex items-center gap-1 text-sm text-red-600 hover:text-red-700 font-medium transition-colors"
+              >
+                Детайли
+                <Eye size={16} />
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {showDetails && (
+        <ListingDetailsModal listing={listing} onClose={() => setShowDetails(false)} />
+      )}
+    </>
+  );
+}

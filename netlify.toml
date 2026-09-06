@@ -1,0 +1,13 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Позволява на React Router (client-side routing) да работи коректно -
+# всички пътища се обслужват от index.html, а React Router поема нататък.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

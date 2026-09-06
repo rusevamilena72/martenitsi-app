@@ -1,16 +1,32 @@
 import { useState } from 'react';
-import { X, ChevronLeft, ChevronRight } from 'lucide-react';
-import { ListingWithImages } from '../lib/supabase';
+import { X, ChevronLeft, ChevronRight, ShoppingCart, Check } from 'lucide-react';
+import { ListingWithImages, getAvailabilityLabel } from '../lib/supabase';
+import { useCart } from '../contexts/CartContext';
 
 interface ListingDetailsModalProps {
   listing: ListingWithImages;
   onClose: () => void;
 }
 
+const AVAILABILITY_STYLES: Record<string, string> = {
+  in_stock: 'bg-green-100 text-green-800',
+  made_to_order: 'bg-amber-100 text-amber-800',
+  sold_out: 'bg-gray-200 text-gray-600',
+};
+
 export default function ListingDetailsModal({ listing, onClose }: ListingDetailsModalProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [justAdded, setJustAdded] = useState(false);
+  const { addItem } = useCart();
   const images = listing.images || [];
   const hasImages = images.length > 0;
+  const isSoldOut = listing.availability === 'sold_out';
+
+  const handleAddToOrder = () => {
+    addItem(listing);
+    setJustAdded(true);
+    setTimeout(() => setJustAdded(false), 1500);
+  };
 
   const nextImage = () => {
     if (hasImages) {
@@ -114,12 +130,48 @@ export default function ListingDetailsModal({ listing, onClose }: ListingDetails
           )}
 
           <div className="space-y-4">
+            {listing.availability && (
+              <span
+                className={`inline-block text-sm font-medium px-3 py-1 rounded-full ${
+                  AVAILABILITY_STYLES[listing.availability] || AVAILABILITY_STYLES.in_stock
+                }`}
+              >
+                {getAvailabilityLabel(listing.availability)}
+              </span>
+            )}
+
             <div>
               <h3 className="text-lg font-semibold text-gray-800 mb-2">Цена</h3>
               <p className="text-2xl font-bold text-red-600">
                 {listing.price.toFixed(2)} {listing.currency}
               </p>
             </div>
+
+            <button
+              onClick={handleAddToOrder}
+              disabled={isSoldOut}
+              className={`w-full flex items-center justify-center gap-2 text-sm font-medium py-3 rounded-md transition-colors ${
+                isSoldOut
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : justAdded
+                  ? 'bg-green-600 text-white'
+                  : 'bg-red-600 text-white hover:bg-red-700'
+              }`}
+            >
+              {isSoldOut ? (
+                'Изчерпано'
+              ) : justAdded ? (
+                <>
+                  <Check size={18} />
+                  Добавено към поръчката
+                </>
+              ) : (
+                <>
+                  <ShoppingCart size={18} />
+                  Добави към поръчката
+                </>
+              )}
+            </button>
 
             {listing.size && (
               <div>

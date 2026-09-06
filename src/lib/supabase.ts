@@ -22,6 +22,8 @@ export type Category = 'komplekti' | 'unikalni' | 'grivni' | 'cvetya' | 'zhivotn
 
 export type Currency = 'лв.' | 'EUR';
 
+export type Availability = 'in_stock' | 'made_to_order' | 'sold_out';
+
 export type Listing = {
   id: string;
   user_id: string;
@@ -31,6 +33,7 @@ export type Listing = {
   size: string | null;
   price: number;
   currency: Currency;
+  availability: Availability;
   row_position: number;
   column_position: number;
   show_on_homepage: boolean;
@@ -72,6 +75,17 @@ export const getCategoryPath = (category: Category): string => {
 };
 
 export const CURRENCIES: Currency[] = ['лв.', 'EUR'];
+
+export const AVAILABILITY_OPTIONS: { value: Availability; label: string }[] = [
+  { value: 'in_stock', label: 'В наличност' },
+  { value: 'made_to_order', label: 'Изработва се по поръчка' },
+  { value: 'sold_out', label: 'Изчерпано' },
+];
+
+export const getAvailabilityLabel = (availability: Availability): string => {
+  const opt = AVAILABILITY_OPTIONS.find((a) => a.value === availability);
+  return opt ? opt.label : availability;
+};
 
 export const ALLOWED_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
 export const MAX_IMAGE_SIZE = 1024 * 1024;

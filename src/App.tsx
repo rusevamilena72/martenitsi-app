@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { CartProvider } from './contexts/CartContext';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import BackgroundProvider from './components/BackgroundProvider';
@@ -19,11 +20,13 @@ import NewListingPage from './pages/NewListingPage';
 import EditListingPage from './pages/EditListingPage';
 import ContactPage from './pages/ContactPage';
 import OrderPage from './pages/OrderPage';
+import SearchPage from './pages/SearchPage';
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <CartProvider>
         <BackgroundProvider>
           <div className="flex flex-col">
             <Header />
@@ -39,6 +42,7 @@ function App() {
               <Route path="/gerdani" element={<GerdaniPage />} />
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/order" element={<OrderPage />} />
+              <Route path="/search" element={<SearchPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route
@@ -70,6 +74,7 @@ function App() {
             <Footer />
           </div>
         </BackgroundProvider>
+        </CartProvider>
       </AuthProvider>
     </BrowserRouter>
   );

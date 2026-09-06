@@ -1,13 +1,25 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, X, User, LogOut, LogIn, ShoppingCart } from 'lucide-react';
+import { Menu, X, User, LogOut, LogIn, ShoppingCart, Search } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useCart } from '../contexts/CartContext';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState('');
   const { user, profile, signOut } = useAuth();
+  const { totalCount } = useCart();
   const navigate = useNavigate();
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchValue.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchValue.trim())}`);
+      setSearchValue('');
+      setIsMenuOpen(false);
+    }
+  };
 
   const navLinks = [
     { path: '/', label: 'Начало' },
@@ -49,12 +61,28 @@ export default function Header() {
           </nav>
 
           <div className="hidden md:flex items-center gap-2">
+            <form onSubmit={handleSearchSubmit} className="relative">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+              <input
+                type="text"
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                placeholder="Търси..."
+                className="w-36 lg:w-48 pl-8 pr-2 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+              />
+            </form>
+
             <Link
               to="/order"
-              className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
+              className="relative flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
             >
               <ShoppingCart size={18} />
               Поръчай
+              {totalCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                  {totalCount}
+                </span>
+              )}
             </Link>
 
             {user ? (
@@ -107,6 +135,17 @@ export default function Header() {
 
         {isMenuOpen && (
           <nav className="md:hidden py-4 border-t">
+            <form onSubmit={handleSearchSubmit} className="relative px-4 mb-3">
+              <Search className="absolute left-7 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+              <input
+                type="text"
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                placeholder="Търси..."
+                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+              />
+            </form>
+
             {navLinks.map((link) => (
               <Link
                 key={link.path}
@@ -120,10 +159,15 @@ export default function Header() {
             <Link
               to="/order"
               onClick={() => setIsMenuOpen(false)}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-red-50 text-red-600 hover:bg-red-100 transition-colors rounded-md"
+              className="relative flex items-center gap-2 px-4 py-2 text-sm font-medium bg-red-50 text-red-600 hover:bg-red-100 transition-colors rounded-md mx-4"
             >
               <ShoppingCart size={18} />
               Поръчай
+              {totalCount > 0 && (
+                <span className="bg-red-600 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                  {totalCount}
+                </span>
+              )}
             </Link>
             <div className="border-t mt-2 pt-2">
               {user ? (

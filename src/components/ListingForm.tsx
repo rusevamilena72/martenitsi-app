@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase, CATEGORIES, CURRENCIES, Category, Currency, Listing, ListingImage } from '../lib/supabase';
+import { supabase, CATEGORIES, CURRENCIES, AVAILABILITY_OPTIONS, Category, Currency, Availability, Listing, ListingImage } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { AlertCircle, CheckCircle } from 'lucide-react';
 import ImageUpload from './ImageUpload';
@@ -33,6 +33,7 @@ export default function ListingForm({ listing, onSuccess }: ListingFormProps) {
     size: listing?.size || '',
     price: listing?.price?.toString() || '',
     currency: listing?.currency || ('EUR' as Currency),
+    availability: listing?.availability || ('in_stock' as Availability),
     row_position: listing?.row_position?.toString() || '1',
     column_position: listing?.column_position?.toString() || '1',
     show_on_homepage: listing?.show_on_homepage || false,
@@ -114,6 +115,7 @@ export default function ListingForm({ listing, onSuccess }: ListingFormProps) {
       size: formData.size || null,
       price,
       currency: formData.currency,
+      availability: formData.availability,
       row_position: rowPosition,
       column_position: columnPosition,
       show_on_homepage: formData.show_on_homepage,
@@ -292,6 +294,25 @@ export default function ListingForm({ listing, onSuccess }: ListingFormProps) {
               ))}
             </select>
           </div>
+        </div>
+
+        <div>
+          <label htmlFor="availability" className="block text-sm font-medium text-gray-700 mb-1">
+            Наличност <span className="text-red-600">*</span>
+          </label>
+          <select
+            id="availability"
+            value={formData.availability}
+            onChange={(e) => setFormData({ ...formData, availability: e.target.value as Availability })}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+            required
+          >
+            {AVAILABILITY_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

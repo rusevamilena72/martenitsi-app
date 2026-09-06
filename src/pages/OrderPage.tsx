@@ -1,20 +1,56 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ShoppingCart, AlertCircle, CheckCircle } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { ShoppingCart, AlertCircle, CheckCircle, Minus, Plus, Trash2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useCart } from '../contexts/CartContext';
 
 export default function OrderPage() {
   const navigate = useNavigate();
+  const { items, updateQuantity, removeItem, totalPrice, clearCart } = useCart();
   const [customerEmail, setCustomerEmail] = useState('');
   const [customerDetails, setCustomerDetails] = useState('');
-  const [orderDetails, setOrderDetails] = useState('');
+  const [manualOrderDetails, setManualOrderDetails] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
+  const hasCartItems = items.length > 0;
+
+  const buildOrderDetails = () => {
+    if (!hasCartItems) {
+      return manualOrderDetails.trim();
+    }
+
+    const lines = items.map((item) => {
+      const sizeText = item.size ? ` (${item.size})` : '';
+      const lineTotal = (item.price * item.quantity).toFixed(2);
+      return `${item.name}${sizeText} x${item.quantity} - ${lineTotal} ${item.currency}`;
+    });
+
+    const summary = [
+      lines.join('\n'),
+      '',
+      `Обща сума: ${totalPrice.toFixed(2)} EUR`,
+    ];
+
+    if (manualOrderDetails.trim()) {
+      summary.push('', `Бележки: ${manualOrderDetails.trim()}`);
+    }
+
+    return summary.join('\n');
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    const orderDetails = buildOrderDetails();
+
+    if (!orderDetails) {
+      setError('Моля, добавете поне един артикул към поръчката или опишете какво искате да поръчате');
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -51,10 +87,11 @@ export default function OrderPage() {
         console.error('Failed to send email notification');
       }
 
+      clearCart();
       setSuccess(true);
       setCustomerEmail('');
       setCustomerDetails('');
-      setOrderDetails('');
+      setManualOrderDetails('');
 
       setTimeout(() => {
         navigate('/');
@@ -108,6 +145,72 @@ export default function OrderPage() {
             </div>
           )}
 
+          {hasCartItems ? (
+            <div className="mb-6">
+              <h2 className="text-lg font-semibold text-gray-800 mb-3">Артикули в поръчката</h2>
+              <div className="space-y-3">
+                {items.map((item) => (
+                  <div
+                    key={item.listingId}
+                    className="flex items-center justify-between gap-3 border border-gray-200 rounded-md p-3"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-gray-800 break-words">{item.name}</p>
+                      {item.size && <p className="text-xs text-gray-500">Размер: {item.size}</p>}
+                      <p className="text-sm text-red-600 font-semibold">
+                        {item.price.toFixed(2)} {item.currency}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => updateQuantity(item.listingId, item.quantity - 1)}
+                        className="p-1.5 border border-gray-300 rounded-md hover:bg-gray-100 transition-colors"
+                        title="Намали"
+                      >
+                        <Minus size={14} />
+                      </button>
+                      <span className="w-6 text-center font-medium">{item.quantity}</span>
+                      <button
+                        type="button"
+                        onClick={() => updateQuantity(item.listingId, item.quantity + 1)}
+                        className="p-1.5 border border-gray-300 rounded-md hover:bg-gray-100 transition-colors"
+                        title="Увеличи"
+                      >
+                        <Plus size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeItem(item.listingId)}
+                        className="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                        title="Премахни"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
+                <span className="font-semibold text-gray-800">Общо:</span>
+                <span className="text-xl font-bold text-red-600">{totalPrice.toFixed(2)} EUR</span>
+              </div>
+            </div>
+          ) : (
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
+              <p className="text-sm text-blue-800">
+                Нямаш добавени артикули от бутона „Добави към поръчката” на продуктите. Можеш да
+                разгледаш{' '}
+                <Link to="/" className="underline font-medium">
+                  продуктите
+                </Link>{' '}
+                и да ги добавиш, или да опишеш поръчката си ръчно по-долу.
+              </p>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="customerEmail" className="block text-sm font-medium text-gray-700 mb-2">
@@ -145,20 +248,32 @@ export default function OrderPage() {
             </div>
 
             <div>
-              <label htmlFor="orderDetails" className="block text-sm font-medium text-gray-700 mb-2">
-                Детайли на поръчката <span className="text-red-600">*</span>
+              <label htmlFor="manualOrderDetails" className="block text-sm font-medium text-gray-700 mb-2">
+                {hasCartItems ? (
+                  'Бележки към поръчката'
+                ) : (
+                  <>
+                    Детайли на поръчката <span className="text-red-600">*</span>
+                  </>
+                )}
               </label>
               <textarea
-                id="orderDetails"
-                value={orderDetails}
-                onChange={(e) => setOrderDetails(e.target.value)}
-                rows={6}
+                id="manualOrderDetails"
+                value={manualOrderDetails}
+                onChange={(e) => setManualOrderDetails(e.target.value)}
+                rows={hasCartItems ? 3 : 6}
                 className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
-                placeholder="Например:&#10;- Мартеница 'Мече' - 2 броя&#10;- Мартеница 'Цвете' - 1 брой&#10;- Размер: 5x5 см"
-                required
+                placeholder={
+                  hasCartItems
+                    ? 'Например: специфичен цвят, опаковане за подарък и др. (незадължително)'
+                    : "Например:\n- Мартеница 'Мече' - 2 броя\n- Мартеница 'Цвете' - 1 брой\n- Размер: 5x5 см"
+                }
+                required={!hasCartItems}
               />
               <p className="mt-1 text-xs text-gray-500">
-                Опишете какво искате да поръчате - име на артикули, брой, размери и др.
+                {hasCartItems
+                  ? 'По желание - специални изисквания към поръчката'
+                  : 'Опишете какво искате да поръчате - име на артикули, брой, размери и др.'}
               </p>
             </div>
 

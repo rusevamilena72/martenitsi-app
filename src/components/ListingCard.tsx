@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
-import { ListingWithImages, getCategoryLabel, getCategoryPath } from '../lib/supabase';
-import { Edit, Trash2, Eye, ArrowRight } from 'lucide-react';
+import { ListingWithImages, getCategoryLabel, getCategoryPath, getAvailabilityLabel } from '../lib/supabase';
+import { Edit, Trash2, Eye, ArrowRight, ShoppingCart, Check } from 'lucide-react';
 import ListingDetailsModal from './ListingDetailsModal';
+import { useCart } from '../contexts/CartContext';
 
 interface ListingCardProps {
   listing: ListingWithImages;
@@ -11,8 +12,26 @@ interface ListingCardProps {
   onDelete?: (id: string) => void;
 }
 
+const AVAILABILITY_STYLES: Record<string, string> = {
+  in_stock: 'bg-green-100 text-green-800',
+  made_to_order: 'bg-amber-100 text-amber-800',
+  sold_out: 'bg-gray-200 text-gray-600',
+};
+
 export default function ListingCard({ listing, showActions = false, showCategory = false, onDelete }: ListingCardProps) {
   const [showDetails, setShowDetails] = useState(false);
+  const [justAdded, setJustAdded] = useState(false);
+  const { addItem } = useCart();
+
+  const isSoldOut = listing.availability === 'sold_out';
+
+  const handleAddToOrder = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addItem(listing);
+    setJustAdded(true);
+    setTimeout(() => setJustAdded(false), 1500);
+  };
 
   const handleDelete = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -62,7 +81,19 @@ export default function ListingCard({ listing, showActions = false, showCategory
         </div>
 
         <div className="p-4">
-          <h3 className="text-lg font-semibold text-gray-800 mb-2 break-words">{listing.name}</h3>
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <h3 className="text-lg font-semibold text-gray-800 break-words">{listing.name}</h3>
+          </div>
+
+          {listing.availability && (
+            <span
+              className={`inline-block text-xs font-medium px-2 py-0.5 rounded-full mb-2 ${
+                AVAILABILITY_STYLES[listing.availability] || AVAILABILITY_STYLES.in_stock
+              }`}
+            >
+              {getAvailabilityLabel(listing.availability)}
+            </span>
+          )}
 
           <p className="text-sm text-gray-600 mb-3 line-clamp-2">{listing.description}</p>
 
@@ -104,6 +135,34 @@ export default function ListingCard({ listing, showActions = false, showCategory
               </button>
             )}
           </div>
+
+          {!showActions && (
+            <button
+              onClick={handleAddToOrder}
+              disabled={isSoldOut}
+              className={`mt-3 w-full flex items-center justify-center gap-2 text-sm font-medium py-2 rounded-md transition-colors ${
+                isSoldOut
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : justAdded
+                  ? 'bg-green-600 text-white'
+                  : 'bg-red-50 text-red-600 hover:bg-red-100'
+              }`}
+            >
+              {isSoldOut ? (
+                'Изчерпано'
+              ) : justAdded ? (
+                <>
+                  <Check size={16} />
+                  Добавено
+                </>
+              ) : (
+                <>
+                  <ShoppingCart size={16} />
+                  Добави към поръчката
+                </>
+              )}
+            </button>
+          )}
         </div>
       </div>
 

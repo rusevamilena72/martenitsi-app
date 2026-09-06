@@ -2,7 +2,13 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { AlertCircle, CheckCircle, User, Lock, Plus, Package, Edit, Trash2, UserPlus, Image as ImageIcon, X } from 'lucide-react';
-import { supabase, ListingWithImages, getCategoryLabel } from '../lib/supabase';
+import { supabase, ListingWithImages, getCategoryLabel, getAvailabilityLabel } from '../lib/supabase';
+
+const AVAILABILITY_BADGE_STYLES: Record<string, string> = {
+  in_stock: 'bg-green-100 text-green-800',
+  made_to_order: 'bg-amber-100 text-amber-800',
+  sold_out: 'bg-gray-200 text-gray-600',
+};
 
 export default function ProfilePage() {
   const { user, profile, loading, updateProfile, updatePassword } = useAuth();
@@ -532,6 +538,7 @@ export default function ProfilePage() {
                     <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Име</th>
                     <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Категория</th>
                     <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Цена</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Наличност</th>
                     <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Размер</th>
                     <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Начална страница</th>
                     <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Действия</th>
@@ -548,6 +555,15 @@ export default function ProfilePage() {
                       </td>
                       <td className="py-3 px-4 text-sm font-semibold text-red-600">
                         {listing.price.toFixed(2)} {listing.currency}
+                      </td>
+                      <td className="py-3 px-4">
+                        <span
+                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                            AVAILABILITY_BADGE_STYLES[listing.availability] || AVAILABILITY_BADGE_STYLES.in_stock
+                          }`}
+                        >
+                          {getAvailabilityLabel(listing.availability)}
+                        </span>
                       </td>
                       <td className="py-3 px-4 text-sm text-gray-600">
                         {listing.size || '-'}

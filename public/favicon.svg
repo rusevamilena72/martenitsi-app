@@ -2,5 +2,5 @@
   <path d="M14 14 L32 26 L50 14" fill="none" stroke="#dc2626" stroke-width="5" stroke-linecap="round"/>
   <path d="M14 20 L32 26 L50 20" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>
   <polygon points="24,23 6,54 26,58" fill="#dc2626"/>
-  <polygon points="40,23 58,54 38,58" fill="#ffffff" stroke="#dc2626" stroke-width="2.5" stroke-linejoin="round"/>
+  <polygon points="40,23 58,54 38,58" fill="#ffffff" stroke="#dc2626" stroke-width="4" stroke-linejoin="round"/>
 </svg>
